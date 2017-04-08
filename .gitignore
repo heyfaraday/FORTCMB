@@ -1,0 +1,8 @@
+# CMake build folder
+build/
+
+# Fortran module files
+*.mod
+
+# macOS
+*.DS_Store
