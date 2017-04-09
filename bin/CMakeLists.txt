@@ -21,7 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(BIN_FILES hp_test.f90)
-add_executable(hp_test.a ${BIN_FILES})
+set(BIN_FILES nr_test.f90)
+add_executable(nr_test.a ${BIN_FILES})
 
-target_link_libraries(hp_test.a lib nr)
+target_link_libraries(nr_test.a lib nr)

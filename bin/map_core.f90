@@ -1,7 +1,6 @@
 program map_core
 
   use write_in_file, only: write_iteration
-  use nr_module, only: four1
   use nrtype
 
   implicit none
@@ -18,8 +17,7 @@ program map_core
   real :: ran_num
 
   ! Allocation
-  allocate(map(1:pix_nu
-  , 1:pix_num/2), stat=err_map)
+  allocate(map(1:pix_num, 1:pix_num/2), stat=err_map)
   if (err_map /= 0) print *, "map: Allocation request denied"
 
   allocate(polynom(0:legendre_num, 0:legendre_num), stat=err_polynom)

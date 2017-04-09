@@ -1,6 +1,12 @@
 # CMake build folder
 build/
 
+# CMake debug folder
+debug/
+
+# CMake release folder
+release/
+
 # Fortran module files
 *.mod
 
