@@ -1,6 +1,7 @@
 SUBROUTINE gasdev_s(harvest)
 
   USE nrtype
+  USE nr, ONLY : ran1
 
   IMPLICIT NONE
   REAL(SP), INTENT(OUT) :: harvest
@@ -30,6 +31,7 @@ END SUBROUTINE gasdev_s
 SUBROUTINE gasdev_v(harvest)
 
   USE nrtype; USE nrutil, ONLY : array_copy
+  USE nr, ONLY : ran1
 
   IMPLICIT NONE
   REAL(SP), DIMENSION(:), INTENT(OUT) :: harvest

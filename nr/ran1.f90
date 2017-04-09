@@ -5,7 +5,7 @@
     iran0,jran0,kran0,nran0,mran0,rans
 
     IMPLICIT NONE
-    
+
     REAL(SP), INTENT(OUT) :: harvest
 
     if (lenran < 1) call ran_init(1)

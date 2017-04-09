@@ -1,6 +1,7 @@
 SUBROUTINE four1_sp(data,isign)
 
   USE nrtype; USE nrutil, ONLY : arth,assert
+  USE nr, ONLY : fourrow
 
   IMPLICIT NONE
   COMPLEX(SPC), DIMENSION(:), INTENT(INOUT) :: data
@@ -33,6 +34,7 @@ END SUBROUTINE four1_sp
 SUBROUTINE four1_dp(data,isign)
 
   USE nrtype; USE nrutil, ONLY : arth,assert
+  USE nr, ONLY : fourrow
 
   IMPLICIT NONE
   COMPLEX(DPC), DIMENSION(:), INTENT(INOUT) :: data
