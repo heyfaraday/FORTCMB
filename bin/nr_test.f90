@@ -10,6 +10,10 @@ program nr_test
   real :: rand = 1.d0
   integer :: first, second, third
 
+  double precision, dimension(0:3) :: a_coef = (/1.d0, 2.d0, 3.d0, 4.d0/)
+  double precision, dimension(0:3) :: b_coef = (/3.d0, 2.d0, 1.d0, 5.d0/)
+  complex, dimension(0:3) :: a_b
+
   type(C_PTR) :: plan
   complex(C_DOUBLE_COMPLEX), dimension(0:3) :: in, out
 
@@ -55,5 +59,19 @@ program nr_test
   call ran_seed(second)
   call gasdev(rand)
   write(unit=*, fmt=*) rand
+
+  a_b = cmplx(a_coef, b_coef)
+
+  write(unit=*, fmt=*) 'a_coef'
+  write(unit=*, fmt=*) a_coef
+  write(unit=*, fmt=*) 'b_coef'
+  write(unit=*, fmt=*) b_coef
+  write(unit=*, fmt=*) 'a_b'
+  write(unit=*, fmt=*) a_b
+  write(unit=*, fmt=*) 'real(a_b)'
+  write(unit=*, fmt=*) real(a_b)
+  write(unit=*, fmt=*) 'aimag(a_b)'
+  write(unit=*, fmt=*) aimag(a_b)
+
 
 end program nr_test
