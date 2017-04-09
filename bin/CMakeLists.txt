@@ -21,7 +21,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-set(BIN_FILES healpix_test.f90)
-add_executable(healpix_test.a ${BIN_FILES})
+set(BIN_FILES map_core.f90)
+add_executable(map_core.a ${BIN_FILES})
 
-target_link_libraries(healpix_test.a lib nr)
+target_link_libraries(map_core.a lib nr)
