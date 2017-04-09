@@ -9,7 +9,3 @@ set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/modules)
 add_subdirectory(bin)
 add_subdirectory(lib)
 add_subdirectory(nr)
-
-set(CMAKE_Fortran_COMPILER_ID Intel)
-
-set(CMAKE_Fortran_FLAGS "-warn all -check all -O2 -m64")

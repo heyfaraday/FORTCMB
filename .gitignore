@@ -4,5 +4,8 @@ build/
 # Fortran module files
 *.mod
 
+# Planck data folder
+planck_data/
+
 # macOS
 *.DS_Store
