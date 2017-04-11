@@ -4,7 +4,8 @@ program plm_test
   use alm_tools, only: plm_gen
   use pix_tools
   use, intrinsic :: iso_c_binding
-  use fourier, only: p_lm_gen
+  use fourier, only: p_lm_gen, direct_fourier
+  use map_coef, only: a_lm_gasdev
 
   implicit none
   double precision, dimension(:, :), allocatable :: polynom
@@ -12,6 +13,8 @@ program plm_test
   integer :: err_polynom
   double precision :: theta
   integer :: pix_num = 8
+
+  complex, dimension(0:4) :: a_lms
 
   include 'fftw3.f03'
 
@@ -28,7 +31,6 @@ program plm_test
 
   call plm_gen(nside, lmax, mmax, plm)
 
-
   allocate(polynom(0:legendre_num, 0:legendre_num), stat=err_polynom)
   if (err_polynom /= 0) print *, "polynom: Allocation request denied"
 
@@ -40,5 +42,9 @@ program plm_test
 
   if (allocated(polynom)) deallocate(polynom, stat=err_polynom)
   if (err_polynom /= 0) print *, "polynom: Deallocation request denied"
+
+  call a_lm_gasdev(4,a_lms,1245,1.d0,1.d0)
+
+  write(*, *) a_lms
 
 end program plm_test
