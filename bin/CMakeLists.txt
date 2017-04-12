@@ -10,7 +10,7 @@ link_directories(/usr/local/Healpix/lib)
 link_directories(/usr/local/Cellar/fftw)
 link_directories(/usr/local/Cellar/cfitsio)
 
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -warn all -std=f2008")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -warn all -std=f2008 -clang-name=clang")
 set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS} -check pointer -debug all -g -traceback")
 set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS} -O3 -m64 -ip -xCORE-AVX2")
 # or -xHOST

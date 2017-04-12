@@ -91,6 +91,11 @@ module fourier
       allocate(p2(1:n_max), stat=err_p2)
       if (err_p2 /= 0) print *, "p2: Allocation request denied"
 
+      ! Nyquist warning
+      if ( p_lm_max > n_max / 2 + 1 ) then
+        print *, "Nyquist frequency warning!"
+      end if
+
       ! Initialization
       map = 0.d0
 
@@ -113,7 +118,7 @@ module fourier
         in = dcmplx(p1, 0.d0)
         out = (0.d0, 0.d0)
 
-        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_MEASURE)
+        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
 
         call fftw_execute_dft(plan, in, out)
 
@@ -125,14 +130,14 @@ module fourier
         in = dcmplx(p2, 0.d0)
         out = (0.d0, 0.d0)
 
-        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_MEASURE)
+        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
 
         call fftw_execute_dft(plan, in, out)
 
         call fftw_destroy_plan(plan)
 
-        map(1:n_max, j) = map(1:n_max, j) + aimag(out(1:n_max))
-        map(n_max+1, j) = map(n_max+1, j) + aimag(out(1))
+        map(1:n_max, j) = map(1:n_max, j) - aimag(out(1:n_max))
+        map(n_max+1, j) = map(n_max+1, j) - aimag(out(1))
 
       end do
 
@@ -143,5 +148,100 @@ module fourier
       if (err_p2 /= 0) print *, "p2: Deallocation request denied"
 
     end subroutine direct_fourier
+
+
+    subroutine inverse_fourier(n_max, map, p_lm_max, coef)
+
+      ! n_max = number of pixels for different phi
+      ! map = array for reading map
+      ! p_lm_max = maximum of l and m
+      ! coef = array for writing
+
+      ! C module for fftw
+      use, intrinsic :: iso_c_binding
+
+      implicit none
+      include 'fftw3.f03' ! Header for fftw
+      integer, intent(in) :: n_max
+      double precision, dimension(1:n_max+1, 1:n_max/2+1), intent(in) :: map
+      integer, intent(in) :: p_lm_max
+      complex, dimension(0:p_lm_max, 0:p_lm_max), intent(out) :: coef
+
+      integer :: i, j ! Vars for iterating in the map
+      double precision :: theta ! Theta as parameter for polynoms and map
+      ! Array for p_lm_gen
+      double precision, dimension(0:p_lm_max, 0:p_lm_max) :: p_lm
+      integer :: m, l ! Var for iterating
+      ! Normalization for backward fourier transform
+      double precision :: norm = 0.d0
+
+      type(C_PTR) :: plan ! Pointer for fftw plan
+      ! Arrays for fftw
+      complex(C_DOUBLE_COMPLEX), dimension(1:n_max) :: in, out
+
+      ! Nyquist warning
+      if ( p_lm_max > n_max / 2 + 1 ) then
+        print *, "Nyquist frequency warning!"
+      end if
+
+      ! Initialization
+      coef = (0.d0, 0.d0)
+
+      do j = 2, n_max / 2, 1
+
+        in = (0.d0, 0.d0)
+        out = (0.d0, 0.d0)
+
+        theta = 2.d0 * fourier_PI * (j - 1) / n_max
+
+        call p_lm_gen(theta, p_lm_max, p_lm)
+
+        do i = 1, n_max, 1
+            in(i) = dcmplx(map(i,j), 0.d0)
+        end do
+
+        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_BACKWARD, FFTW_ESTIMATE)
+
+        call fftw_execute_dft(plan, in, out)
+
+        call fftw_destroy_plan(plan)
+
+        do i = 2, n_max/2, 1
+            out(i) = dcmplx(real(out(i)) + real(out(n_max + 2 - i)), &
+                            aimag(out(i)) - aimag(out(n_max + 2 - i)))
+        end do
+
+        out = out / n_max
+        out(n_max/2+2:n_max) = (0.d0, 0.d0)
+
+        norm = norm + dsin(theta)
+
+        do m = 1, p_lm_max, 1
+          do l = m, p_lm_max, 1
+            coef(m, l) = coef(m, l) &
+            + dcmplx(real(out(m + 1)) * p_lm(m, l), 0.d0) * dsin(theta) &
+            * 4 * fourier_PI / 2.d0
+            coef(m, l) = coef(m, l) &
+            + dcmplx(0.d0, aimag(out(m+1)) * p_lm(m, l)) * dsin(theta) &
+            * 4 * fourier_PI / 2.d0
+          end do
+        end do
+
+        do m = 0, 0, 1
+          do l = m, p_lm_max, 1
+            coef(m, l) = coef(m, l) &
+            + dcmplx(real(out(m + 1)) * p_lm(m, l), 0.d0) * dsin(theta) &
+            * 4 * fourier_PI
+            coef(m, l) = coef(m, l) &
+            + dcmplx(0.d0, aimag(out(m+1)) * p_lm(m, l)) * dsin(theta) &
+            * 4 * fourier_PI
+          end do
+        end do
+
+      end do
+
+      coef = coef / norm
+
+    end subroutine inverse_fourier
 
 end module fourier

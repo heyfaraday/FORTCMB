@@ -43,6 +43,10 @@ module map_coef
         end do
       end do
 
+      do l = 0, p_lm_max, 1
+        coef(l, l) = coef(l, l) - dcmplx(0.d0, aimag(coef(l, l)))
+      end do
+
       ! 0- and 1- mode disabled
       coef(0, 0) = (0.d0, 0.d0)
       coef(0, 1) = (0.d0, 0.d0)

@@ -6,8 +6,8 @@ from mpl_toolkits.basemap import Basemap
 
 map = genfromtxt('out.dat')
 
-N = 8
-projection = 'cyl'  # 'cyl', 'moll', 'ortho'
+N = 2048
+projection = 'moll'  # 'cyl', 'moll', 'ortho'
 save_as_png = False
 save_as_svg = False
 
@@ -32,7 +32,7 @@ fig.subplots_adjust(
 ax = fig.add_axes([0.0, 0.0, 1.0, 1.0])
 ax.axis('off')
 
-cmb_map = Basemap(projection=projection, lon_0=0.0, lat_0=45.0, resolution='l')
+cmb_map = Basemap(projection=projection, lon_0=0.0, lat_0=0.0, resolution='l')
 cmb_map.contourf(
     x * rad, y * rad, inside_map, 512, cmap=plt.cm.jet, latlon=True)
 
