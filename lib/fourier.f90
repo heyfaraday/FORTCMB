@@ -62,6 +62,7 @@ module fourier
       ! coef = array with a_lm
 
       ! C module for fftw
+      use healpix_types
       use, intrinsic :: iso_c_binding
 
       implicit none
@@ -77,13 +78,13 @@ module fourier
       double precision, dimension(0:p_lm_max, 0:p_lm_max) :: p_lm
       integer :: m, l ! Var for iterating
       ! Arrays for our fftw on sphere method
-      double precision, dimension(:), allocatable :: p1, p2
+      real(kind=dp), dimension(:), allocatable :: p1, p2
       integer :: err_p1, err_p2 = 0! Error flags memory allocating
 
 
       type(C_PTR) :: plan ! Pointer for fftw plan
       ! Arrays for fftw
-      complex(C_DOUBLE_COMPLEX), dimension(1:n_max) :: in, out
+      complex(C_LONG_DOUBLE_COMPLEX), dimension(1:n_max) :: in, out
 
       allocate(p1(1:n_max), stat=err_p1)
       if (err_p1 /= 0) print *, "p1: Allocation request denied"
@@ -115,7 +116,7 @@ module fourier
           end do
         end do
 
-        in = dcmplx(p1, 0.d0)
+        in = cmplx(p1, 0.d0)
         out = (0.d0, 0.d0)
 
         plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
@@ -159,6 +160,7 @@ module fourier
 
       ! C module for fftw
       use, intrinsic :: iso_c_binding
+      use healpix_types
 
       implicit none
       include 'fftw3.f03' ! Header for fftw
@@ -230,10 +232,10 @@ module fourier
         do m = 0, 0, 1
           do l = m, p_lm_max, 1
             coef(m, l) = coef(m, l) &
-            + dcmplx(real(out(m + 1)) * p_lm(m, l), 0.d0) * dsin(theta) &
+            + dcmplx(real(out(m + 1)), 0.d0) * p_lm(m, l) * dsin(theta) &
             * 4 * fourier_PI
             coef(m, l) = coef(m, l) &
-            + dcmplx(0.d0, aimag(out(m+1)) * p_lm(m, l)) * dsin(theta) &
+            + dcmplx(0.d0, aimag(out(m+1))) * p_lm(m, l) * dsin(theta) &
             * 4 * fourier_PI
           end do
         end do

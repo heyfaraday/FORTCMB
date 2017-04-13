@@ -1,15 +1,18 @@
 program map_test
 
+  use healpix_types
   use fourier, only: p_lm_gen, direct_fourier, inverse_fourier
   use map_coef, only: a_lm_gasdev
+  use minkowski, only: area, length
+  use distance, only: s2
 
   implicit none
-  integer :: legendre_num = 2 !!! legendre_num = n_pix / 2
-  integer :: n_pix = 2048
-  double precision, dimension(:, :), allocatable :: map
-  complex, dimension(:, :), allocatable :: a_lms
-  integer :: i, j
-  integer :: err_map, err_alms
+  integer(kind=i8b) :: legendre_num = 5 !!! legendre_num = n_pix / 2
+  integer(kind=i8b) :: n_pix = 2048_i8b
+  real(kind=dp), dimension(:, :), allocatable :: map
+  complex(kind=dpc), dimension(:, :), allocatable :: a_lms
+  integer(kind=i8b) :: i, j
+  integer(kind=i8b) :: err_map, err_alms
 
   allocate(map(1:n_pix+1, 1:n_pix/2+1), stat=err_map)
   if (err_map /= 0) print *, "map: Allocation request denied"
@@ -19,12 +22,12 @@ program map_test
 
   open(1, file="../../out.dat")
 
-  call a_lm_gasdev(legendre_num, a_lms, 1515127513, 0.d0, 1.d0)
+  call a_lm_gasdev(legendre_num, a_lms, 151514512, 0.d0, 1.d0)
 
   call direct_fourier(n_pix, map, legendre_num, a_lms)
 
   write(*, *) '0, 0', a_lms(0, 0)
-  write(*, *) '0, 1', a_lms(0, 1)
+  write(*, *) '0, 1', a_lms(0, 0)
   write(*, *) '1, 1', a_lms(1, 1)
   write(*, *) '0, 2', a_lms(0, 2)
   write(*, *) '1, 2', a_lms(1, 2)
@@ -48,6 +51,10 @@ program map_test
       write(1, *) map(i, j), i, j
     end do
   end do
+
+  write(*, *) 'area', area(n_pix, map, 0.d0)
+  write(*, *) 'length', length(n_pix, map, 0.d0)
+
 
   if (allocated(a_lms)) deallocate(a_lms, stat=err_alms)
   if (err_alms /= 0) print *, "a_lms: Deallocation request denied"

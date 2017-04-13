@@ -1,13 +1,13 @@
 module map_coef
 
+  ! Healpix module
+  use healpix_types
+
   implicit none
 
   contains
 
     subroutine a_lm_gasdev(p_lm_max, coef, seed, mean, std)
-
-      ! Healpix module
-      use healpix_types
 
       ! p_lm_max = maximum of l and m
       ! coef = array for writing
