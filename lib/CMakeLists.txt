@@ -27,6 +27,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-set(LIB_FILES distance.f90 map_coef.f90 minkowski.f90 write_in_file.f90)
+set(LIB_FILES distance.f90 fourier.f90 map_coef.f90 minkowski.f90 write_in_file.f90)
 
 add_library(lib STATIC ${LIB_FILES})

@@ -15,7 +15,7 @@ module minkowski
       ! level = F_1(level) - minkowski parameter
 
       implicit none
-      integer(kind=i8b), intent(in) :: n_max
+      integer(kind=i4b), intent(in) :: n_max
       real(kind=dp), dimension(1:n_max+1, 1:n_max/2+1), intent(in) :: map
       real(kind=dp), intent(in) :: level
 
@@ -118,7 +118,7 @@ module minkowski
             else if ( map(i, j + 1) * map(i + 1, j + 1) < 0.0_dp) then
 
               phi1 = phi
-              theta1 = theta + h_theta * dabs(map(i, j)) &
+              theta1 = theta + h_theta * abs(map(i, j)) &
               / (abs(map(i, j)) + abs(map(i, j + 1)))
 
               phi2 = phi + h_phi * abs(map(i, j + 1)) &
@@ -162,11 +162,11 @@ module minkowski
             if ( map(i, j + 1) * map(i + 1, j + 1) < 0.0_dp) then
 
               phi1 = phi_1
-              theta1 = theta + h_theta * dabs(map(i + 1, j)) &
-              / (dabs(map(i + 1, j)) + dabs(map(i + 1, j + 1)))
+              theta1 = theta + h_theta * abs(map(i + 1, j)) &
+              / (abs(map(i + 1, j)) + abs(map(i + 1, j + 1)))
 
-              phi2 = phi + h_phi * dabs(map(i, j + 1)) &
-              / (dabs(map(i, j + 1)) + dabs(map(i + 1, j + 1)))
+              phi2 = phi + h_phi * abs(map(i, j + 1)) &
+              / (abs(map(i, j + 1)) + abs(map(i + 1, j + 1)))
               theta2 = theta_1
 
               l = l + s2(phi1, phi2, theta1, theta2)

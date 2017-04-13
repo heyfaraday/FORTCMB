@@ -5,6 +5,8 @@ program map_test2
   use map_coef, only: a_lm_gasdev
   use distance, only: s2
   use minkowski, only: area
+  use fourier, only: p_lm_gen, direct_fourier, inverse_fourier
+  use minkowski, only: area
 
   use nr, only: gasdev
   use ran_state, only: ran_seed
@@ -21,8 +23,8 @@ program map_test2
   ! write(*, *) 'dpc', num_dpc
 
   !
-  integer(kind=i8b) :: legendre_num = 3_i8b
-  integer(kind=i8b) :: n_pix = 2048_i8b
+  integer(kind=i8b) :: legendre_num = 500_i8b
+  integer(kind=i4b) :: n_pix = 2048_i4b
   real(kind=dp), dimension(:, :), allocatable :: map
   complex(kind=dpc), dimension(:, :), allocatable :: a_lm
 
@@ -57,17 +59,40 @@ program map_test2
   !
 
   !
-  ! call a_lm_gasdev(legendre_num, a_lm, 12451525_i4b, 0.0_dp, 1.0_dp)
-  ! write(*, *) '0, 0', a_lm(0, 0)
-  ! write(*, *) '0, 1', a_lm(0, 1)
-  ! write(*, *) '1, 1', a_lm(1, 1)
-  ! write(*, *) '0, 2', a_lm(0, 2)
-  ! write(*, *) '1, 2', a_lm(1, 2)
-  ! write(*, *) '2, 2', a_lm(2, 2)
-  ! write(*, *) '0, 3', a_lm(0, 3)
-  ! write(*, *) '1, 3', a_lm(1, 3)
-  ! write(*, *) '2, 3', a_lm(2, 3)
-  ! write(*, *) '3, 3', a_lm(3, 3)
+  call a_lm_gasdev(legendre_num, a_lm, 12451525_i4b, 0.0_dp, 1.0_dp)
+  write(*, *) '0, 0', a_lm(0, 0)
+  write(*, *) '0, 1', a_lm(0, 1)
+  write(*, *) '1, 1', a_lm(1, 1)
+  write(*, *) '0, 2', a_lm(0, 2)
+  write(*, *) '1, 2', a_lm(1, 2)
+  write(*, *) '2, 2', a_lm(2, 2)
+  write(*, *) '0, 3', a_lm(0, 3)
+  write(*, *) '1, 3', a_lm(1, 3)
+  write(*, *) '2, 3', a_lm(2, 3)
+  write(*, *) '3, 3', a_lm(3, 3)
+  !
+
+  !
+  call direct_fourier(n_pix, map, legendre_num, a_lm)
+  ! write(*, *) map
+  !
+
+  !
+  call inverse_fourier(n_pix, map, legendre_num, a_lm)
+  write(*, *) '0, 0', a_lm(0, 0)
+  write(*, *) '0, 1', a_lm(0, 1)
+  write(*, *) '1, 1', a_lm(1, 1)
+  write(*, *) '0, 2', a_lm(0, 2)
+  write(*, *) '1, 2', a_lm(1, 2)
+  write(*, *) '2, 2', a_lm(2, 2)
+  write(*, *) '0, 3', a_lm(0, 3)
+  write(*, *) '1, 3', a_lm(1, 3)
+  write(*, *) '2, 3', a_lm(2, 3)
+  write(*, *) '3, 3', a_lm(3, 3)
+  !
+
+  !
+  write(*, *) 'area', area(n_pix, map, 0.0_dp)
   !
 
   !
