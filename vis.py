@@ -7,7 +7,7 @@ from mpl_toolkits.basemap import Basemap
 map = genfromtxt('out.dat')
 
 N = 2048
-projection = 'moll'  # 'cyl', 'moll', 'ortho'
+projection = 'cyl'  # 'cyl', 'moll', 'ortho'
 save_as_png = False
 save_as_svg = False
 
