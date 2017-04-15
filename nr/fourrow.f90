@@ -30,7 +30,7 @@ SUBROUTINE fourrow_sp(data,isign)
     if (n <= mmax) exit
     istep=2*mmax
     theta=PI_D/(isign*mmax)
-    wp=cmplx(-2.0_dp*sin(0.5_dp*theta)**2,sin(theta),kind=dpc)
+    wp=cmplx(-2.0_dp*dsin(0.5_dp*theta)**2,dsin(theta),kind=dpc)
     w=cmplx(1.0_dp,0.0_dp,kind=dpc)
     do m=1,mmax
       ws=w
@@ -78,7 +78,7 @@ SUBROUTINE fourrow_dp(data,isign)
     if (n <= mmax) exit
     istep=2*mmax
     theta=PI_D/(isign*mmax)
-    wp=cmplx(-2.0_dp*sin(0.5_dp*theta)**2,sin(theta),kind=dpc)
+    wp=cmplx(-2.0_dp*dsin(0.5_dp*theta)**2,dsin(theta),kind=dpc)
     w=cmplx(1.0_dp,0.0_dp,kind=dpc)
     do m=1,mmax
       ws=w

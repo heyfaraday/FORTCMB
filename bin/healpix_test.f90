@@ -38,7 +38,7 @@ program nr_test
 
   dw8 = 1.d0
 
-  z = sin(10.d0 * DEG2RAD)
+  z = dsin(10.d0 * DEG2RAD)
 
   call input_map("../../planck_data/COM_CMB_IQU-smica_1024_R2.02_full.fits", map, npix, nmaps, fmissval=0.d0)
 

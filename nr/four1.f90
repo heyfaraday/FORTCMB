@@ -19,7 +19,7 @@ SUBROUTINE four1_sp(data,isign)
   dat=reshape(data,shape(dat))
   call fourrow(dat,isign)
   theta=arth(0,isign,m1)*TWOPI_D/n
-  wp=cmplx(-2.0_dp*sin(0.5_dp*theta)**2,sin(theta),kind=dpc)
+  wp=cmplx(-2.0_dp*dsin(0.5_dp*theta)**2,dsin(theta),kind=dpc)
   w=cmplx(1.0_dp,0.0_dp,kind=dpc)
   do j=2,m2
     w=w*wp+w
@@ -52,7 +52,7 @@ SUBROUTINE four1_dp(data,isign)
   dat=reshape(data,shape(dat))
   call fourrow(dat,isign)
   theta=arth(0,isign,m1)*TWOPI_D/n
-  wp=cmplx(-2.0_dp*sin(0.5_dp*theta)**2,sin(theta),kind=dpc)
+  wp=cmplx(-2.0_dp*dsin(0.5_dp*theta)**2,dsin(theta),kind=dpc)
   w=cmplx(1.0_dp,0.0_dp,kind=dpc)
   do j=2,m2
     w=w*wp+w

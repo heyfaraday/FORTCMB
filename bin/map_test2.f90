@@ -5,7 +5,7 @@ program map_test2
   use map_coef, only: a_lm_gasdev
   use distance, only: s2
   use minkowski, only: area
-  use fourier, only: p_lm_gen, direct_fourier, inverse_fourier
+  use fourier, only: p_lm_gen, direct_fourier, inverse_fourier, direct_point_fourier
   use minkowski, only: area
 
   use nr, only: gasdev
@@ -23,14 +23,16 @@ program map_test2
   ! write(*, *) 'dpc', num_dpc
 
   !
-  integer(kind=i8b) :: legendre_num = 500_i8b
-  integer(kind=i4b) :: n_pix = 2048_i4b
+  integer(kind=i8b) :: legendre_num = 1_i8b
+  integer(kind=i4b) :: n_pix = 8192_i4b
   real(kind=dp), dimension(:, :), allocatable :: map
   complex(kind=dpc), dimension(:, :), allocatable :: a_lm
 
   integer(kind=i8b) :: err_map = 0_i8b
   integer(kind=i8b) :: err_a_lm = 0_i8b
   !
+  integer(kind=i8b) :: i, j
+  real(kind=dp) :: norm, fun
 
   !
   ! real(kind=sp) :: rand_num_dummy
@@ -74,9 +76,14 @@ program map_test2
 
   !
   call direct_fourier(n_pix, map, legendre_num, a_lm)
-  ! write(*, *) map
-  !
+  write(*, *) 'j=1', map(:, 1) * map(:, 1)
+  write(*, *) 'j=2', map(:, 2) * map(:, 2)
+  write(*, *) 'j=3', map(:, 3) * map(:, 3)
+  write(*, *) 'j=4', map(:, 4) * map(:, 4)
+  write(*, *) 'j=5', map(:, 5) * map(:, 5)
 
+  write(*, *) 'point', direct_point_fourier(2, 2, n_pix, legendre_num, a_lm)
+  write(*, *) 'map', map(2, 2)
   !
   call inverse_fourier(n_pix, map, legendre_num, a_lm)
   write(*, *) '0, 0', a_lm(0, 0)
@@ -93,6 +100,22 @@ program map_test2
 
   !
   write(*, *) 'area', area(n_pix, map, 0.0_dp)
+  !
+
+  fun = 0.0_dp
+  norm = 0.0_dp
+
+  write(*, *) '-------------'
+
+  !
+  do i = 1, n_pix, 1
+    do j = 1, n_pix/2 + 1 , 1
+      fun = fun + map(i, j) * map(i, j) * dsin(2.0_dp * PI * (j - 1) / n_pix)
+      norm = norm + dsin(2.0_dp * PI * (j - 1) / n_pix)
+    end do
+  end do
+
+  write(*, *) fun, norm, fun * 4.0_dp * PI
   !
 
   !

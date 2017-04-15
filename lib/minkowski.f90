@@ -3,7 +3,7 @@ module minkowski
   use healpix_types
 
   implicit none
-  real(kind=dp), parameter :: minkowski_PI = 4.0_dp * atan(1.0_dp)
+  real(kind=dp), parameter :: minkowski_PI = 4.0_dp * datan(1.0_dp)
 
   contains
 
@@ -36,10 +36,10 @@ module minkowski
           ! + map(i + 1, j) + map(i + 1, j + 1)) / 4.0_dp
 
           if ( mean > level ) then
-            a = a + sin(theta)
+            a = a + dsin(theta)
           end if
 
-          na = na + sin(theta)
+          na = na + dsin(theta)
 
         end do
       end do
@@ -182,5 +182,46 @@ module minkowski
     length = l / 4.0_dp / minkowski_PI
 
     end function length
+
+
+    integer(kind=i8b) function condition_1(xx, yy, xy)
+
+      implicit none
+      real(kind=dp), intent(in) :: xx, yy, xy
+
+      if (( xx * yy - xy * xy >= 0.0_dp .and. xx >= 0.0_dp ) &
+      .or. (xx * yy - xy * xy >= 0.0_dp .and. yy >= 0.0_dp )) then
+        condition_1 = 0
+      else
+        if (( xx * yy - xy * xy >= 0.0_dp .and. 0.0_dp > xx ) &
+        .or. (xx * yy - xy * xy >= 0.0_dp .and. 0.0_dp > yy )) then
+          condition_1 = 2
+        else
+          condition_1 = 1
+        end if
+      end if
+
+    end function condition_1
+
+    integer(kind=i8b) function condition_2(xx, yy, xy)
+
+      use routines, only: QuadraticEquationSolver
+
+      implicit none
+      real(kind=dp), intent(in) :: xx, yy, xy
+
+      if (( xx * yy - xy * xy >= 0.0_dp .and. xx >= 0.0_dp ) &
+      .or. (xx * yy - xy * xy >= 0.0_dp .and. yy >= 0.0_dp )) then
+          condition_2 = 0
+      else
+        if (( xx * yy - xy * xy >= 0.0_dp .and. 0.0_dp > xx ) &
+        .or. (xx * yy - xy * xy >= 0.0_dp .and. 0.0_dp > yy )) then
+          condition_2 = 2
+          else
+            condition_2 = 1
+        end if
+      end if
+
+    end function condition_2
 
 end module minkowski
