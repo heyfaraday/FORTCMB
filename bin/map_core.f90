@@ -44,10 +44,10 @@ program map_core
   polynom(0, 0) = 1.d0 / sqrt(4.d0 * my_PI)
 
   do m = 0, legendre_num - 1, 1
-    polynom(m + 1, m + 1) = -polynom(m, m)*sin(theta)*sqrt(2.d0*m+3.d0)/sqrt(2.d0*m+2.d0)
+    polynom(m + 1, m + 1) = -polynom(m, m)*dsin(theta)*sqrt(2.d0*m+3.d0)/sqrt(2.d0*m+2.d0)
   end do
   do m = 0, legendre_num - 1, 1
-    polynom(m, m + 1) = polynom(m, m)*cos(theta)*sqrt(2.d0*m+3.d0)
+    polynom(m, m + 1) = polynom(m, m)*dcos(theta)*sqrt(2.d0*m+3.d0)
   end do
   do m = 0, legendre_num - 2, 1
     do l = m + 2, legendre_num, 1
