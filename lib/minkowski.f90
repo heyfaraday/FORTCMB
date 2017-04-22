@@ -1,5 +1,6 @@
 module minkowski
 
+  ! Healpix module
   use healpix_types
 
   implicit none
@@ -25,15 +26,15 @@ module minkowski
       ! Area without normalization and normalization factor
       real(kind=dp) :: a, na
 
-      do j = 2, n_max / 2 , 1
+      do j = 1, n_max / 2 + 1 , 1
 
-        theta = 2.0_dp * minkowski_PI * (j - 1) / n_max
+        theta = 2.0_dp * minkowski_PI * (j - 1.0_dp) / n_max
 
         do i = 1, n_max, 1
 
           mean = (map(i, j))
-          ! mean = (map(i, j) + map(i, j + 1) &
-          ! + map(i + 1, j) + map(i + 1, j + 1)) / 4.0_dp
+          mean = (map(i, j) + map(i, j + 1) &
+          + map(i + 1, j) + map(i + 1, j + 1)) / 4.0_dp
 
           if ( mean > level ) then
             a = a + dsin(theta)
@@ -59,7 +60,7 @@ module minkowski
       ! level = F_2(level) - minkowski parameter
 
       implicit none
-      integer(kind=i8b), intent(in) :: n_max
+      integer(kind=i4b), intent(in) :: n_max
       real(kind=dp), dimension(1:n_max+1, 1:n_max/2+1), &
       intent(out) :: map
       real(kind=dp), intent(in) :: level

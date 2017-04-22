@@ -27,7 +27,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
-set(BIN_FILES map_test2.f90)
-add_executable(map_test2.a ${BIN_FILES})
+set(BIN_FILES map_test.f90)
+add_executable(map_test.a ${BIN_FILES})
 
-target_link_libraries(map_test2.a lib nr)
+target_link_libraries(map_test.a lib nr)

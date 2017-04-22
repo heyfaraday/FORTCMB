@@ -8,7 +8,7 @@ program map_test
 
   implicit none
   integer(kind=i8b) :: legendre_num = 5 !!! legendre_num = n_pix / 2
-  integer(kind=i8b) :: n_pix = 2048_i8b
+  integer(kind=i4b) :: n_pix = 512_i8b
   real(kind=dp), dimension(:, :), allocatable :: map
   complex(kind=dpc), dimension(:, :), allocatable :: a_lms
   integer(kind=i8b) :: i, j

@@ -10,10 +10,10 @@ module fourier
 
     subroutine p_lm_gen(j, n_max, p_lm_max, p_lm_array)
 
-      ! j = for indexing on a map
-      ! n_max = number of pixels for different phi
-      ! p_lm_max = maximum of l and m
-      ! p_lm_array = array for writing
+      ! j - for indexing on a map
+      ! n_max - number of pixels for different phi
+      ! p_lm_max - maximum of l and m
+      ! p_lm_array - array for writing
 
       implicit none
       integer(kind=i8b), intent(in) :: j
@@ -22,13 +22,13 @@ module fourier
       real(kind=dp), dimension(0:p_lm_max, 0:p_lm_max), &
                                   intent(out) :: p_lm_array
 
-      integer(kind=i8b) :: m, l ! Var for iterating
-      real(kind=dp) :: theta ! theta = theta as parameter for polynoms
+      integer(kind=i8b) :: m, l ! Vars for iterating
+      real(kind=dp) :: theta ! theta - parameter for polynoms and map
 
       ! Initialization
       p_lm_array = 0.0_dp
 
-      theta = 2.0_dp * fourier_PI * (j - 1_i8b) / n_max
+      theta = 2.0_dp * fourier_PI * (j - 1.0_dp) / n_max
 
       p_lm_array(0, 0) = 1.0_dp / dsqrt(4.0_dp * fourier_PI)
 
@@ -64,10 +64,10 @@ module fourier
 
     subroutine direct_fourier(n_max, map, p_lm_max, coef)
 
-      ! n_max = number of pixels for different phi
-      ! map = array for writing map
-      ! p_lm_max = maximum of l and m
-      ! coef = array with a_lm
+      ! n_max - number of pixels for different phi
+      ! map - array for writing map
+      ! p_lm_max - maximum of l and m
+      ! coef - array for reading a_lm
 
       ! C module for fftw
       use, intrinsic :: iso_c_binding
@@ -82,16 +82,21 @@ module fourier
       integer(kind=i8b) :: j ! Var for iterating in the map
       real(kind=dp) :: theta ! Theta as parameter for polynoms and map
       ! Array for p_lm_gen
-      real(kind=dp), dimension(0:p_lm_max, 0:p_lm_max) :: p_lm
-      integer(kind=i8b) :: m, l ! Var for iterating
+      real(kind=dp), dimension(:, :), allocatable :: p_lm
+      integer(kind=i8b) :: err_p_lm = 0 ! Error flag memory allocating
+      integer(kind=i8b) :: m, l ! Vars for iterating
       ! Arrays for our fftw on sphere method
       real(kind=dp), dimension(:), allocatable :: p1, p2
-      integer(kind=i8b) :: err_p1, err_p2 = 0! Error flags memory allocating
-
+      integer(kind=i8b) :: err_p1, err_p2 = 0 ! Error flags memory allocating
 
       type(C_PTR) :: plan ! Pointer for fftw plan
       ! Arrays for fftw
       complex(C_DOUBLE_COMPLEX), dimension(1:n_max) :: in, out
+
+      plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
+
+      allocate(p_lm(0:p_lm_max, 0:p_lm_max), stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Allocation request denied"
 
       allocate(p1(1:n_max), stat=err_p1)
       if (err_p1 /= 0) print *, "p1: Allocation request denied"
@@ -112,7 +117,7 @@ module fourier
         p1 = 0.0_dp
         p2 = 0.0_dp
 
-        theta = 2.0_dp * fourier_PI * (j - 1) / n_max
+        theta = 2.0_dp * fourier_PI * (j - 1.0_dp) / n_max
 
         call p_lm_gen(j, n_max, p_lm_max, p_lm)
 
@@ -126,20 +131,7 @@ module fourier
         in = dcmplx(p1, 0.0_dp)
         out = (0.0_dp, 0.0_dp)
 
-        if ( j == 2) then
-          write(*, *) 'forw : in(3)(1)', in(1)
-          write(*, *) 'POINT_1', p1(1), p_lm(0, 1)
-        end if
-
-        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
-
         call fftw_execute_dft(plan, in, out)
-
-        call fftw_destroy_plan(plan)
-
-        ! if ( j == 3) then
-        !   write(*, *) 'forw : out(3)', out
-        ! end if
 
         map(1:n_max, j) = dble(out(1:n_max))
         map(n_max+1, j) = dble(out(1))
@@ -147,16 +139,17 @@ module fourier
         in = dcmplx(p2, 0.0_dp)
         out = (0.0_dp, 0.0_dp)
 
-        plan = fftw_plan_dft_1d(n_max, in, out, FFTW_FORWARD, FFTW_ESTIMATE)
-
         call fftw_execute_dft(plan, in, out)
 
-        call fftw_destroy_plan(plan)
-
-        map(1:n_max, j) = map(1:n_max, j) - dimag(out(1:n_max))
-        map(n_max+1, j) = map(n_max+1, j) - dimag(out(1))
+        map(1:n_max, j) = map(1:n_max, j) + dimag(out(1:n_max))
+        map(n_max+1, j) = map(n_max+1, j) + dimag(out(1))
 
       end do
+
+      call fftw_destroy_plan(plan)
+
+      if (allocated(p_lm)) deallocate(p_lm, stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Deallocation request denied"
 
       if (allocated(p1)) deallocate(p1, stat=err_p1)
       if (err_p1 /= 0) print *, "p1: Deallocation request denied"
@@ -169,10 +162,10 @@ module fourier
 
     real(kind=dp) function direct_point_fourier(i, j, n_max, p_lm_max, coef)
 
-      ! j = for indexing on a map
-      ! n_max = number of pixels for different phi
-      ! p_lm_max = maximum of l and m
-      ! coef = array with a_lm
+      ! j - for indexing on a map
+      ! n_max - number of pixels for different phi
+      ! p_lm_max - maximum of l and m
+      ! coef - array with a_lm
 
       implicit none
       integer(kind=i8b), intent(in) :: i, j
@@ -183,12 +176,16 @@ module fourier
 
       real(kind=dp) :: phi, theta ! Theta as parameter for polynoms and map
       ! Array for p_lm_gen
-      real(kind=dp), dimension(0:p_lm_max, 0:p_lm_max) :: p_lm
-      integer(kind=i8b) :: m, l ! Var for iterating
+      real(kind=dp), dimension(:, :), allocatable :: p_lm
+      integer(kind=i8b) :: err_p_lm = 0 ! Error flag memory allocating
+      integer(kind=i8b) :: m, l ! Vars for iterating
       ! Arrays for our fftw on sphere method
       real(kind=dp), dimension(:), allocatable :: p1, p2
-      integer(kind=i8b) :: err_p1, err_p2 = 0! Error flags memory allocating
+      integer(kind=i8b) :: err_p1, err_p2 = 0 ! Error flags memory allocating
       real(kind=dp) :: f = 0.0_dp
+
+      allocate(p_lm(0:p_lm_max, 0:p_lm_max), stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Allocation request denied"
 
       allocate(p1(1:n_max), stat=err_p1)
       if (err_p1 /= 0) print *, "p1: Allocation request denied"
@@ -201,8 +198,8 @@ module fourier
         print *, "Nyquist frequency warning!"
       end if
 
-      phi = 2.0_dp * fourier_PI * (i - 1) / n_max
-      theta = 2.0_dp * fourier_PI * (j - 1) / n_max
+      phi = 2.0_dp * fourier_PI * (i - 1.0_dp) / n_max
+      theta = 2.0_dp * fourier_PI * (j - 1.0_dp) / n_max
 
       call p_lm_gen(j, n_max, p_lm_max, p_lm)
 
@@ -216,11 +213,12 @@ module fourier
         end do
       end do
 
-      ! write(*, *) 'POINT', real(coef(0, 0)), p_lm(0, 0)
-
       do m = 0, p_lm_max, 1
         f = f + p1(m + 1) * dcos(phi * m) + p2(m + 1) * dsin(phi * m)
       end do
+
+      if (allocated(p_lm)) deallocate(p_lm, stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Deallocation request denied"
 
       if (allocated(p1)) deallocate(p1, stat=err_p1)
       if (err_p1 /= 0) print *, "p1: Deallocation request denied"
@@ -235,10 +233,10 @@ module fourier
 
     subroutine inverse_fourier(n_max, map, p_lm_max, coef)
 
-      ! n_max = number of pixels for different phi
-      ! map = array for reading map
-      ! p_lm_max = maximum of l and m
-      ! coef = array for writing
+      ! n_max - number of pixels for different phi
+      ! map - array for reading map
+      ! p_lm_max - maximum of l and m
+      ! coef - array for writing
 
       ! C module for fftw
       use, intrinsic :: iso_c_binding
@@ -253,14 +251,20 @@ module fourier
       integer(kind=i8b) :: i, j ! Vars for iterating in the map
       real(kind=dp) :: theta ! Theta as parameter for polynoms and map
       ! Array for p_lm_gen
-      real(kind=dp), dimension(0:p_lm_max, 0:p_lm_max) :: p_lm
-      integer(kind=i8b) :: m, l ! Var for iterating
+      real(kind=dp), dimension(:, :), allocatable :: p_lm
+      integer(kind=i8b) :: err_p_lm = 0 ! Error flag memory allocating
+      integer(kind=i8b) :: m, l ! Vars for iterating
       ! Normalization for backward fourier transform
       real(kind=dp) :: norm = 0.0_dp
 
       type(C_PTR) :: plan ! Pointer for fftw plan
       ! Arrays for fftw
       complex(C_DOUBLE_COMPLEX), dimension(1:n_max) :: in, out
+
+      plan = fftw_plan_dft_1d(n_max, in, out, FFTW_BACKWARD, FFTW_ESTIMATE)
+
+      allocate(p_lm(0:p_lm_max, 0:p_lm_max), stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Allocation request denied"
 
       ! Nyquist warning
       if ( p_lm_max > n_max / 2 + 1 ) then
@@ -270,14 +274,12 @@ module fourier
       ! Initialization
       coef = (0.0_dp, 0.0_dp)
 
-      plan = fftw_plan_dft_1d(n_max, in, out, FFTW_BACKWARD, FFTW_ESTIMATE)
-
       do j = 1, n_max / 2 + 1, 1
 
         in = (0.0_dp, 0.0_dp)
         out = (0.0_dp, 0.0_dp)
 
-        theta = 2.0_dp * fourier_PI * (j - 1) / n_max
+        theta = 2.0_dp * fourier_PI * (j - 1.0_dp) / n_max
 
         call p_lm_gen(j, n_max, p_lm_max, p_lm)
 
@@ -285,15 +287,7 @@ module fourier
             in(i) = dcmplx(map(i, j), 0.0_dp)
         end do
 
-        if ( j == 1) then
-          write(*, *) 'back: in(1)', in(1)
-        end if
-
         call fftw_execute_dft(plan, in, out)
-
-        if ( j == 1) then
-          write(*, *) 'back: out(1)', out(1) / 8
-        end if
 
         do i = 2, n_max/2, 1
             out(i) = dcmplx(dble(out(i)) + dble(out(n_max + 2 - i)), &
@@ -303,18 +297,7 @@ module fourier
         out = out / n_max
         out(n_max/2+2:n_max) = (0.0_dp, 0.0_dp)
 
-        if ( j == 1) then
-          write(*, *) 'back_2: out(1)', out(1)
-        end if
-
-        ! if ( j == 3) then
-        !   write(*, *) 'out(3)', out
-        ! end if
-
         norm = norm + dsin(theta)
-
-        write(*, *) 'dsin for norm', dsin(theta)
-        ! write(*, *) 'p_ml', p_lm(1, 1)
 
         do m = 1, p_lm_max, 1
           do l = m, p_lm_max, 1
@@ -324,34 +307,25 @@ module fourier
             coef(m, l) = coef(m, l) &
             + dcmplx(0.0_dp, dimag(out(m+1)) * p_lm(m, l)) * dsin(theta) &
             * 4.0_dp * fourier_PI / 2.0_dp
-            ! if (l==1 .and. m==1) then
-            !   write(*, *) 'Im here', coef(m, l), p_lm(m, l) * dsin(theta) * 4.0_dp * fourier_PI / 2.0_dp
-            ! end if
           end do
         end do
 
-        if ( j == 1) then
-          write(*, *) 'back_3: man', dcmplx(dble(out(1)), 0.0_dp)
-          write(*, *) 'p_ml', p_lm(0, 1)
-          write(*, *) 'sin', dsin(theta) * 4.0_dp * fourier_PI
-        end if
-
-        do m = 0, 0, 1
-          do l = m, p_lm_max, 1
-            coef(m, l) = coef(m, l) &
-            + dcmplx(dble(out(m + 1)), 0.0_dp) * p_lm(m, l) * dsin(theta) &
-            * 4.0_dp * fourier_PI
-            coef(m, l) = coef(m, l) &
-            + dcmplx(0.0_dp, dimag(out(m+1))) * p_lm(m, l) * dsin(theta) &
-            * 4.0_dp * fourier_PI
-          end do
+        do l = 0, p_lm_max, 1
+          coef(0, l) = coef(0, l) &
+          + dcmplx(dble(out(1)), 0.0_dp) * p_lm(0, l) * dsin(theta) &
+          * 4.0_dp * fourier_PI
+          coef(0, l) = coef(0, l) &
+          + dcmplx(0.0_dp, dimag(out(1))) * p_lm(0, l) * dsin(theta) &
+          * 4.0_dp * fourier_PI
         end do
 
       end do
 
-      write(*, *) 'FINAL', coef(0, 1), norm
-
       call fftw_destroy_plan(plan)
+
+      if (allocated(p_lm)) deallocate(p_lm, stat=err_p_lm)
+      if (err_p_lm /= 0) print *, "p_lm: Deallocation request denied"
+
       coef = coef / norm
 
     end subroutine inverse_fourier

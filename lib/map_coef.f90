@@ -9,10 +9,10 @@ module map_coef
 
     subroutine a_lm_gasdev(p_lm_max, coef, seed, mean, std)
 
-      ! p_lm_max = maximum of l and m
-      ! coef = array for writing
-      ! seed = number for nr ran. num. generator
-      ! mean, std = mean and std values for normal distribution
+      ! p_lm_max - maximum of l and m
+      ! coef - array for writing
+      ! seed - number for nr ran. num. generator
+      ! mean, std - mean and std values for normal distribution
 
       ! Numerical recipes modules
       use nr, only: gasdev
@@ -25,7 +25,7 @@ module map_coef
       integer(kind=i4b), intent(in) :: seed
       real(kind=dp), intent(in) :: mean, std
 
-      integer(kind=i8b) :: m, l ! Var for iterating
+      integer(kind=i8b) :: m, l ! Vars for iterating
       real(kind=sp) :: rand1_sp, rand2_sp ! Vars for complex ran. num.
 
       ! Initialization
@@ -49,9 +49,9 @@ module map_coef
       end do
 
       ! 0- and 1- mode disabled
-      coef(0, 0) = (5.0_dp, 2.0_dp)
-      coef(0, 1) = (1.0_dp, 1.0_dp)
-      coef(1, 1) = (1.0_dp, 3.0_dp)
+      coef(0, 0) = (0.0_dp, 0.0_dp)
+      coef(0, 1) = (0.0_dp, 0.0_dp)
+      coef(1, 1) = (0.0_dp, 0.0_dp)
 
     end subroutine a_lm_gasdev
 
